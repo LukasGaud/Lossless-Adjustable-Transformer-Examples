@@ -45,7 +45,7 @@ Rs = fR(s);
 B = -R0(:, [3, 1, 5]);
 A = -R0(:, [2, 4, 6:end]);
 E = double((Rs(:, [2, 4, 6:end]) + A)/s);
-C = [0, 0, 1, zeros(1, 10)];
+C = [0, 0, -1, zeros(1, 10)];
 D = 0;
 [uE1i, uA1i, P, Q, rankTop, nullSize] = fKron(E, A);
 
