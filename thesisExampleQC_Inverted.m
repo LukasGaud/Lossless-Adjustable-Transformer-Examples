@@ -3,23 +3,18 @@
 clear all
 % Defining symbols
 syms s
-% syms ms mu kt ks cs positive real
-% ms = sym(380);
-% mu = sym(55);
-% kt = sym(350e3);
-% ks = sym(2e4);
-% cs = sym(10500);
-
 ms = 380;
 mu = 55;
 kt = 350e3;
 ks = 2e4;
 cs = 10500;
 
-% C1 = @(s)(-[
-%     0, 1, 0;
-%     1, 0, -1;
-%      0, -1, 1]);
+% ms = 2;
+% mu = 1;
+% kt = 1;
+% ks = 1;
+% cs = 1;
+
 C1 = @(s)(-[
     0, -1, 0;
     1, 0, -1;
@@ -53,11 +48,15 @@ fR = @(s)([ ...
 R0 = fR(0);
 Rs = fR(s);
 
-B = -R0(:, [3, 1, 5]);
-A = -R0(:, [2, 4, 6:end]);
-E = (Rs(:, [2, 4, 6:end]) + A)/s;
+% B = -R0(:, [3, 1, 5]);
+% A = -R0(:, [2, 4, 6:end]);
+B = -R0(:, [6, 1, 5]);
+A = -R0(:, [3, 2, 4, 7:end]);
+
 % E = double((Rs(:, [2, 4, 6:end]) + A)/s);
-C = [0, 0, -1, zeros(1, 10)];
+E = double((Rs(:, [3, 2, 4, 7:end]) + A)/s);
+% C = [0, 0, -1, zeros(1, 10)];
+C = [-1, 0, 0, zeros(1, 10)];
 D = 0;
 [uE1i, uA1i, P, Q, rankTop, nullSize] = fKron(E, A);
 
@@ -86,51 +85,15 @@ B_tilde = uB1(rankTop+1:end, :);
 C_tilde = Cfull(rankTop+1:end);
 
 % Final State-Space
-D_bar = double(C_tilde*(s*E_tilde - A_tilde)^(-1)*B_tilde);
+% D_bar = double(C_tilde*(s*E_tilde - A_tilde)^(-1)*B_tilde);
+D_bar = simplify(C_tilde*(s*E_tilde - A_tilde)^(-1)*B_tilde(:,1));
 E_bar = blockE1(1:rankTop, 1:rankTop);
 J_bar = blockA1(1:rankTop, 1:rankTop);
 A_bar = E_bar^(-1)*J_bar;
 B_bar = E_bar^(-1)*uB1(1:rankTop, 1);
 F_bar = E_bar^(-1)*uB1(1:rankTop, [2,3]);
 C_bar = Cfull(1:rankTop);
+H_bar = simplify(C_tilde*(s*E_tilde - A_tilde)^(-1)*B_tilde(:,[2, 3]));
 
 % Checking coordinates
 fullCoord = fullQ^(-1);
-% for k = 1:4
-%     index(k) = find(fullCoord(k, :) ~= 0);
-% end
-
-% Transforming to standard coordinates and re-arranging the columsn with
-% permutation matrix.
-T1 = [
-    -1, 0, 0, 0;
-    0, -1, 0, 0;
-    0, 0, 1/ks, 1/kt;
-    0, 0, 0, 1/kt];
-T2 = [
-    0, 0, 1, 0;
-    1, 0, 0, 0;
-    0, 0, 0, 1;
-    0, 1, 0, 0];
-T = T2*T1;
-
-A_can = T*A_bar*(T^(-1))
-B_can = T*B_bar
-C_can = C_bar*T^(-1)
-D_can = D_bar
-F_can = T*F_bar(:,1)
-G_can = T*F_bar(:,2)
-
-% Determinant Checks
-D1 = det(eye(size(A_bar))*s - A_bar);
-C1 = double(coeffs(D1, s, 'All'));
-Roots1 = roots(C1);
-
-% State-space model - derived by hand
-ssA = [0, 1, 0, 0;...
-        -ks/ms, -cs/ms, ks/ms, cs/ms;...
-        0, 0, 0, 1;...
-        ks/mu, cs/mu, -(kt+ks)/mu, -cs/mu];
-Ds = det(eye(4)*s - ssA);
-Cs = double(coeffs(Ds, s, 'All'));
-Rs = roots(Cs);
