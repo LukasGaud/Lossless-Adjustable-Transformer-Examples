@@ -16,18 +16,18 @@ kt = 350e3;
 ks = 2e4;
 cs = 10500;
 
+C1 = @(s)(-[
+    0, -1, 0;
+    1, 0, 1;
+     0, 1, -1]);
 % C1 = @(s)(-[
 %     0, 1, 0;
 %     1, 0, -1;
 %      0, -1, 1]);
-C1 = @(s)(-[
-    0, -1, 0;
-    1, 0, -1;
-     0, 1, 1]);
 C2 = @(s)(-[
     0, 0;
-    -1, -1;
-    1, 1]);
+    1, 1;
+    -1, -1]);
 Q1 = @(s)([
     cs, 0;
     0, ks]);
@@ -44,11 +44,11 @@ P2 = @(s)([
     0, 0, 1]);
 I1 = [1, 0, 0; 0, 1, 0; 0, 0, 1];
 fR = @(s)([ ...
-    zeros(3,3), I1, zeros(3,2), C1(s)', zeros(3,2), zeros(3,3); ...
+    zeros(3,3), eye(3), zeros(3,2), C1(s)', zeros(3,2), zeros(3,3); ...
     zeros(2,3), zeros(2,3), P1(s), zeros(2,3), -Q1(s), zeros(2,3); ...
     zeros(3,3), zeros(3,3), zeros(3,2), Q2(s), zeros(3,2), -P2(s); ...
     zeros(2,3), zeros(2,3), zeros(2,2), C2(s)', eye(2), zeros(2,3); ...
-    -C1(s), zeros(3,3), -C2(s), zeros(3,3), zeros(3,2), eye(3)]);
+    C1(s), zeros(3,3), -C2(s), zeros(3,3), zeros(3,2), eye(3)]);
 
 R0 = fR(0);
 Rs = fR(s);
@@ -57,7 +57,7 @@ B = -R0(:, [3, 1, 5]);
 A = -R0(:, [2, 4, 6:end]);
 E = (Rs(:, [2, 4, 6:end]) + A)/s;
 % E = double((Rs(:, [2, 4, 6:end]) + A)/s);
-C = [0, 0, -1, zeros(1, 10)];
+C = [0, 0, 1, zeros(1, 10)];
 D = 0;
 [uE1i, uA1i, P, Q, rankTop, nullSize] = fKron(E, A);
 
@@ -93,7 +93,7 @@ A_bar = E_bar^(-1)*J_bar;
 B_bar = E_bar^(-1)*uB1(1:rankTop, 1);
 F_bar = E_bar^(-1)*uB1(1:rankTop, [2,3]);
 C_bar = Cfull(1:rankTop);
-
+G1 = C_bar*(A_bar-s*eye(4))^(-1)*B_bar;
 % Checking coordinates
 fullCoord = fullQ^(-1);
 % for k = 1:4
@@ -103,8 +103,8 @@ fullCoord = fullQ^(-1);
 % Transforming to standard coordinates and re-arranging the columsn with
 % permutation matrix.
 T1 = [
-    -1, 0, 0, 0;
-    0, -1, 0, 0;
+    1, 0, 0, 0;
+    0, 1, 0, 0;
     0, 0, 1/ks, 1/kt;
     0, 0, 0, 1/kt];
 T2 = [

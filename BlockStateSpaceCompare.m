@@ -22,19 +22,20 @@ A21 = [
     0, 0, -kt;
     0, 0, 0;
     1/(ms + mu), 0, 0];
-C2 = [0, -ks, kt*ms/(ms+mu)];
+C2 = -[0, -ks, kt*ms/(ms+mu)];
 B2 = [0; 1; -ms/(ms+mu)];
-D21 = -cs;
-D22 = -mu*ms/(ms + mu);
+D21 = cs;
+D22 = mu*ms/(ms + mu);
 alpha = (1 - 1/p * D22 * 1/p)^(-1);
+alpha = (1 + 1/p * D22 * 1/p)^(-1);
 
 A2 = [
     A21, B2*1/p;
-    alpha*1/p*C2, alpha*1/p*(D21*1/p - D22*(s*p/(p^2)))];
+    -alpha*1/p*C2, -alpha*1/p*(D21*1/p - D22*(s*p/(p^2)))];
 
 A3 = [
     A21, B2*1/p;
-    alpha*1/p*C2, alpha*1/p*(D21*1/p - D22*(s*p/(P)))];
+    -alpha*1/p*C2, -alpha*1/p*(D21*1/p - D22*(s*p/(P)))];
 % simplify(A2)
 
 % Transformation 
@@ -43,6 +44,11 @@ T = [
     1, -1, 0, 0;
     0, 1, 0, 0;
     0, 0, p, -p];
+% Im = [
+%     1, 0, 0, 0;
+%     0, 1, 0, 0;
+%     0, 0, 1, 0;
+%     0, 0, 0, -1];
 Tdot = [
     0, 0, 0, 0;
     0, 0, 0, 0;
